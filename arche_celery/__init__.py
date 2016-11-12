@@ -23,10 +23,13 @@ def includeme(config):
     #FIXME: option to add configurator object or specify ini file?
     #FIXME: This is not the best way to figure out the ini file.
     ini_file = None
-    for arg in argv:
-        if arg.endswith('.ini'):
-            ini_file = arg
-            break
+    if '%s.ini' % APP_NAME in settings:
+        ini_file=settings['%s.ini' % APP_NAME]
+    else:
+        for arg in argv:
+            if arg.endswith('.ini'):
+                ini_file = arg
+                break
     if ini_file:
         config.configure_celery(arg)
     else:
