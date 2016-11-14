@@ -36,4 +36,3 @@ def includeme(config):
         raise Exception("Can't figure out celery configuration.")
     config.include('.signals')
     config.include('.utils')
-    config.include('.views')
