@@ -1,4 +1,4 @@
-from pyramid_celery import celery_app
+from celery.result import ResultSet
 
 
 def add_task(request, task, context, *args, **kw):
@@ -28,14 +28,22 @@ def includeme(config):
 def build_status(result):
     """ Checks the result of the specified task and any children
         Result may look like:
-        {"ready": true, "all_ready": true, "state": "SUCCESS", "total": 1, "completed": 1}
+
+        {
+            'all_ready': True,
+            'completed': 1,
+            'state': 'SUCCESS',
+            'ready': True,
+            'total': 1,
+            'children': {'completed': 0, 'total': 0}
+        }
 
         Meaning of the keywords
 
         ready (bool)
             The tasks ready-state?
 
-        all_completed (bool)
+        all_ready(bool)
             Is the task an all of its children completed?
 
         state (str)
@@ -54,10 +62,11 @@ def build_status(result):
     completed = 0
     total = 0
     children_ready = []
-    if isinstance(result, celery_app.GroupResult):
+    if isinstance(result, ResultSet):
         completed += result.completed_count()
         total += len(result)
-    elif isinstance(result, celery_app.AsyncResult):
+    else:
+        #Assume Assync or Eager result
         response['state'] = result.state
         if result.ready():
             completed += 1

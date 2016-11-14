@@ -22,14 +22,15 @@ def worker_started(signal, sender):
 
 
 @task_prerun.connect
-def prerun_start_request(task_id, task, signal, sender, args, kwargs):
+def prerun_start(task_id, task, signal, sender, args, kwargs):
     """ Populates kwargs
         A context_uid or context_path will be resolved as context instead.
     """
-    logger.debug('signal prerun for %r' % task)
+    logger.debug('signal prerun for %r' % task_id)
     task_env = prepare()
     request = task_env['request']
     if hasattr(request, 'set_celery_userid'):
+
         if 'authenticated_userid' in kwargs:
             request.set_celery_userid(kwargs['authenticated_userid'])
             logger.debug("authenticated_userid set to %s", kwargs['authenticated_userid'])
@@ -66,8 +67,8 @@ def commit_task_results(sender, kwargs = {}, **kw):
 @task_postrun.connect
 def postrun_end_request(sender, task, kwargs = {}, **kw):
     logger.debug('signal postrun for %r' % task)
-    request = kwargs['request']
-    if request.finished_callbacks:
+    request = kwargs.get('request', None)
+    if request and request.finished_callbacks:
         request._process_finished_callbacks()
     threadlocal_manager.pop()
 

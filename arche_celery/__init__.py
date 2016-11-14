@@ -31,7 +31,7 @@ def includeme(config):
                 ini_file = arg
                 break
     if ini_file:
-        config.configure_celery(arg)
+        config.configure_celery(ini_file)
     else:
         raise Exception("Can't figure out celery configuration.")
     config.include('.signals')
